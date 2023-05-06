@@ -20,7 +20,7 @@ open_locale polynomial
 
 
 /-
- The Lemma gives a lower bound on the absolute value of a polynomial f with integral coefficients evaluated at a rational number q which is not a root of f 
+ The Lemma gives a lower bound on the absolute value of a polynomial f with integral coefficients evaluated at a rational number x which is not a root of f 
  -/
 lemma poly_not_zero_low_bound (x : ℚ) (p : ℤ [X]) (hx : x.denom > 0) 
 (hpx : polynomial.aeval x p ≠ 0) : abs(polynomial.aeval x p) ≥ 1 / (x.denom)^(p.nat_degree) :=
@@ -30,29 +30,20 @@ end
 
 /-
 lemma: minimal polynomial of an irrational does not have rational roots
-use: minimal_polynomial.root
 -/
 lemma rat_not_root_minpoly_irrat (y : ℚ) (x : ℝ) (hirr : irrational x) (hint: is_integral ℚ x): ¬ (polynomial.is_root (minpoly ℚ x) y):=
 begin
   by_contradiction,
- unfold irrational at hirr,
-  -- have hyx : algebra_map ℚ ℝ y = x,
-  -- {
-  --   exact minimal_polynomial.root hint a,
-  -- },
-  -- apply hirr,
-  -- simp,
-  -- use y,
-  -- exact hyx,
+  -- minimal polynomial is prime
   have h_prime := minpoly.prime hint,
-
+  -- irreducible polynomial with a root has degree 1
   have h_irr_one := polynomial.degree_eq_one_of_irreducible_of_root (h_prime.irreducible) h,
-
+  -- x is a root of its minimal polynomial
   have h_x_root :=  minpoly.aeval ℚ x,
-
+  -- if x is a root of a degree one polynomial with ℚ coefficients then x ∈ ℚ 
   have h_x_Q := minpoly.mem_range_of_degree_eq_one ℚ x h_irr_one,
+  -- Lean is able to figure out the contraddicition using hirr
   tauto,
-  
 end
 
 def const_Liouville {x : ℝ} (hint : is_integral ℚ x) : ℝ := 
