@@ -7,4 +7,4 @@ Long-Term goal is to obtain proof of Thue's and Roth's Theorems (and possibly th
 ## First goal: Liouville Theorem
 Formalize a full proof of Liouville Theorem following Zannier's book _Diophantine Analysis_
 
-Main contributors: Amos Turchet, Francesco Veneziano
+Main contributors: Amos Turchet, Francesco Veneziano, Laura Capuano & Fabrizio Barroero
