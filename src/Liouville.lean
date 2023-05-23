@@ -8,6 +8,8 @@ import analysis.calculus.cont_diff
 -- import analysis.calculus.mean_value
 --MEAN VALUE THEOREM is
 -- exists_has_deriv_at_eq_slope
+-- LIOUVILLE IN MATHLIB
+-- import number_theory.liouville.basic
 
 -- import topology.algebra.ordered
 -- EXTREME VALUE THEOREM (continuous function on compact obtains max)
@@ -57,10 +59,10 @@ lemma const_Liouville_pos : const_Liouville (hint) > 0 :=
 -- Liouville Theorem
 include hint
 -- add the hint in the hypothesis using the fact that is included in ``variables'' above
-theorem liouville (hirr : irrational x) :   ∀ a b : ℤ, b > 0 → abs(x - (a / b)) > (1 / b^(minpoly ℚ x).nat_degree) :=
+theorem liouville_const (hirr : irrational x) :   ∀ a b : ℤ, b > 0 → abs(x - (a / b)) > (1 / b^(minpoly ℚ x).nat_degree) :=
 begin
 -- exact zero_lt_one
-intros a b ha,
+intros a b ha,    
 -- mai UNFOLD definition
 -- usare aeval di solito invece che eval₂
 -- p is minpoly 
