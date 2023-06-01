@@ -5,6 +5,7 @@ We will follow Zannier's "Lecture Notes on Diophantine Analysis" where the Liouv
 import field_theory.minpoly.is_integrally_closed
 import data.real.irrational
 import analysis.calculus.cont_diff
+import data.polynomial.denoms_clearable
 -- import analysis.calculus.mean_value
 --MEAN VALUE THEOREM is
 -- exists_has_deriv_at_eq_slope
@@ -19,14 +20,22 @@ open_locale polynomial
 -- notation `transcendental` x := ¬(is_algebraic ℤ x)
 
 
+/- 
+Servirebbe lemma che passa dal minpoly al polinomio in ℤ[X] primitivo di grado minimo che si annulla in x, per poter richimare il lemma qui sotto
+  -/
+
 /-
  The Lemma gives a lower bound on the absolute value of a polynomial f with integral coefficients evaluated at a rational number x which is not a root of f 
  -/
-lemma poly_not_zero_low_bound (x : ℚ) (p : ℤ [X]) (hx : x.denom > 0) 
-(hpx : polynomial.aeval x p ≠ 0) : abs(polynomial.aeval x p) ≥ 1 / (x.denom)^(p.nat_degree) :=
+lemma poly_not_zero_low_bound (a b : ℤ  ) (p : ℤ [X]) (hb : 0<b ) 
+(hpab : polynomial.aeval (  (a: ℚ ) / (b  : ℚ  ) ) (polynomial.map (algebra_map ℤ ℚ ) p )≠ 0) :1 ≤ (↑b)^(p.nat_degree)* abs( polynomial.aeval (  (a: ℚ ) / (b  : ℚ  ) ) (polynomial.map (algebra_map ℤ ℚ ) p ))  :=
 begin
-sorry,
+  exact one_le_pow_mul_abs_eval_div hb hpab,
 end
+
+
+
+--  one_le_pow_mul_abs_eval_div
 
 /-
 lemma: minimal polynomial of an irrational does not have rational roots
@@ -49,7 +58,7 @@ end
 def const_Liouville {x : ℝ} (hint : is_integral ℚ x) : ℝ := 
   sorry
 
-variables {x : ℝ} (hint: is_integral ℚ x)
+variables {x : ℝ} (hint: is_integral ℚ x) 
 
 lemma const_Liouville_pos : const_Liouville (hint) > 0 :=
   sorry
@@ -57,15 +66,16 @@ lemma const_Liouville_pos : const_Liouville (hint) > 0 :=
 -- Liouville Theorem
 include hint
 -- add the hint in the hypothesis using the fact that is included in ``variables'' above
-theorem liouville (hirr : irrational x) :   ∀ a b : ℤ, b > 0 → abs(x - (a / b)) > (1 / b^(minpoly ℚ x).nat_degree) :=
+theorem liouville (hirr : irrational x) :   ∀ a b : ℤ, 0 < b → const_Liouville hint < ↑b^(minpoly ℚ x).nat_degree * abs( x - (a / b) ) :=
 begin
 -- exact zero_lt_one
-intros a b ha,
+intros a b hb,
 -- mai UNFOLD definition
 -- usare aeval di solito invece che eval₂
 -- p is minpoly 
 unfold is_integral at hint,
 rcases hint with ⟨p, hpmonic, hpzero⟩,
+-- richimare lemma che "trasforma" p a coeff in ℤ di grado minimo
 -- cases hp with hpmonic hpzero,
 have h1 : abs((polynomial.eval₂ (algebra_map ℚ ℝ) x p) - (polynomial.eval₂ (algebra_map ℚ ℝ) (↑ a / ↑ b) p)) = abs(polynomial.eval₂ (algebra_map ℚ ℝ) (↑ a / ↑ b) p),
 -- the absolute values are the same since x is a zero of its minimal polynomial
