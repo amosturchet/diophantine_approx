@@ -6,9 +6,12 @@ import field_theory.minpoly.is_integrally_closed
 import data.real.irrational
 import analysis.calculus.cont_diff
 import data.polynomial.denoms_clearable
+import data.polynomial.denoms_clearable
 -- import analysis.calculus.mean_value
 --MEAN VALUE THEOREM is
 -- exists_has_deriv_at_eq_slope
+-- LIOUVILLE IN MATHLIB
+-- import number_theory.liouville.basic
 
 -- import topology.algebra.ordered
 -- EXTREME VALUE THEOREM (continuous function on compact obtains max)
@@ -24,6 +27,10 @@ open_locale polynomial
 Servirebbe lemma che passa dal minpoly al polinomio in ℤ[X] primitivo di grado minimo che si annulla in x, per poter richimare il lemma qui sotto
   -/
 
+/- 
+Servirebbe lemma che passa dal minpoly al polinomio in ℤ[X] primitivo di grado minimo che si annulla in x, per poter richimare il lemma qui sotto
+  -/
+
 /-
  The Lemma gives a lower bound on the absolute value of a polynomial f with integral coefficients evaluated at a rational number x which is not a root of f 
  -/
@@ -32,10 +39,6 @@ lemma poly_not_zero_low_bound (a b : ℤ  ) (p : ℤ [X]) (hb : 0<b )
 begin
   exact one_le_pow_mul_abs_eval_div hb hpab,
 end
-
-
-
---  one_le_pow_mul_abs_eval_div
 
 /-
 lemma: minimal polynomial of an irrational does not have rational roots
@@ -66,7 +69,7 @@ lemma const_Liouville_pos : const_Liouville (hint) > 0 :=
 -- Liouville Theorem
 include hint
 -- add the hint in the hypothesis using the fact that is included in ``variables'' above
-theorem liouville (hirr : irrational x) :   ∀ a b : ℤ, 0 < b → const_Liouville hint < ↑b^(minpoly ℚ x).nat_degree * abs( x - (a / b) ) :=
+theorem liouville (hirr : irrational x) :   ∀ a b : ℤ, b > 0 → abs(x - (a / b)) > (1 / b^(minpoly ℚ x).nat_degree) :=
 begin
 -- exact zero_lt_one
 intros a b hb,
@@ -75,6 +78,7 @@ intros a b hb,
 -- p is minpoly 
 unfold is_integral at hint,
 rcases hint with ⟨p, hpmonic, hpzero⟩,
+-- richimare lemma che "trasforma" p a coeff in ℤ di grado minimo
 -- richimare lemma che "trasforma" p a coeff in ℤ di grado minimo
 -- cases hp with hpmonic hpzero,
 have h1 : abs((polynomial.eval₂ (algebra_map ℚ ℝ) x p) - (polynomial.eval₂ (algebra_map ℚ ℝ) (↑ a / ↑ b) p)) = abs(polynomial.eval₂ (algebra_map ℚ ℝ) (↑ a / ↑ b) p),
