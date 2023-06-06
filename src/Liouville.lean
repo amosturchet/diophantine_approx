@@ -29,7 +29,33 @@ Servirebbe lemma che passa dal minpoly al polinomio in ℤ[X] primitivo di grado
 
 /- 
 Servirebbe lemma che passa dal minpoly al polinomio in ℤ[X] primitivo di grado minimo che si annulla in x, per poter richimare il lemma qui sotto
-  -/
+
+Messaggio di Filippo:
+ Io farei così: prima definisci una funzione
+lean
+def pippo : polynomial rat -> polynomial int :=
+
+che prende un polinomio razionale e lo moltiplica per i coefficienti; mentre lo costruisci, ti scontri con la definizione di polinomio che è in docs#polynomial e che ti richiede per ogni `n : nat` un elemento di `int`; tu gli dai il coefficiente del polinomio razionale moltiplicato per il mcm, e poi applichi docs#rat.denom_eq_one_iff.
+
+serve:
+
+import data.rat.defs
+rat.denom_eq_one_iff
+
+
+per lcm: guardare polynomial.integral_normalization
+
+ -/
+
+def lcm_denom_coeffs : ℚ [X] → ℤ := {
+to_fun := sorry,
+} 
+
+def clear_den : ℚ [X]  →   ℤ [X]  := {
+to_fun := sorry,
+}
+
+
 
 /-
  The Lemma gives a lower bound on the absolute value of a polynomial f with integral coefficients evaluated at a rational number x which is not a root of f 
