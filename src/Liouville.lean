@@ -6,7 +6,12 @@ import field_theory.minpoly.is_integrally_closed
 import data.real.irrational
 import analysis.calculus.cont_diff
 import data.polynomial.denoms_clearable
-import data.polynomial.denoms_clearable
+import algebra.gcd_monoid.finset
+open_locale classical big_operators polynomial
+open polynomial
+
+
+--import data.polynomial
 -- import analysis.calculus.mean_value
 --MEAN VALUE THEOREM is
 -- exists_has_deriv_at_eq_slope
@@ -18,24 +23,21 @@ import data.polynomial.denoms_clearable
 -- is_compact.exists_forall_ge
 
 noncomputable theory
-open_locale polynomial 
 
 -- notation `transcendental` x := ¬(is_algebraic ℤ x)
 
 
 /- 
 Servirebbe lemma che passa dal minpoly al polinomio in ℤ[X] primitivo di grado minimo che si annulla in x, per poter richimare il lemma qui sotto
-  -/
-
-/- 
-Servirebbe lemma che passa dal minpoly al polinomio in ℤ[X] primitivo di grado minimo che si annulla in x, per poter richimare il lemma qui sotto
+ 
 
 Messaggio di Filippo:
  Io farei così: prima definisci una funzione
 lean
 def pippo : polynomial rat -> polynomial int :=
 
-che prende un polinomio razionale e lo moltiplica per i coefficienti; mentre lo costruisci, ti scontri con la definizione di polinomio che è in docs#polynomial e che ti richiede per ogni `n : nat` un elemento di `int`; tu gli dai il coefficiente del polinomio razionale moltiplicato per il mcm, e poi applichi docs#rat.denom_eq_one_iff.
+che prende un polinomio razionale e lo moltiplica per i coefficienti; mentre lo costruisci, ti scontri con la definizione di polinomio che è in docs#polynomial e che ti richiede per ogni `n : nat` un elemento di `int`; tu gli dai il coefficiente del polinomio razionale moltiplicato per il mcm, e poi applichi 
+docs#rat.denom_eq_one_iff.
 
 serve:
 
@@ -47,15 +49,88 @@ per lcm: guardare polynomial.integral_normalization
 
  -/
 
-def lcm_denom_coeffs : ℚ [X] → ℤ := {
-to_fun := sorry,
-} 
+def denom_coeffs (p : ℚ[X]): ℕ → ℕ := λ n,  (p.coeff n).denom
 
-def clear_den : ℚ [X]  →   ℤ [X]  := {
-to_fun := sorry,
-}
+def lcm_denom_coeffs (p : ℚ[X]) : ℕ  := (p.support).lcm (denom_coeffs p)
 
 
+def canc_denom2  (p : ℚ[X]) : ℚ[X] := (lcm_denom_coeffs p) • p 
+
+def canc_denom (p : ℚ[X]) : ℚ[X] := 
+∑ i in p.support,  monomial i  (↑(lcm_denom_coeffs p) * (p.coeff i))
+
+
+
+
+-- def to_subring
+
+
+
+/- 
+
+Scusate per il casino, ho fatto esperimenti che non vorrei cancellare
+
+
+example (p: ℚ [X]): ∀n,  ↑((canc_denom p ).coeff n).denom ∣ ((canc_denom p ).coeff n).num :=
+begin
+  intro n,
+  let a:= ((canc_denom p ).coeff n),
+  let l:= lcm_denom_coeffs p,
+  have ha: ((canc_denom p ).coeff n)=  (lcm_denom_coeffs p) * (p.coeff n),{
+    unfold canc_denom,
+    
+  },
+  have hdiv : ↑((canc_denom p ).coeff n).denom ∣ l,
+  {
+    unfold canc_denom,
+    sorry,
+  },
+  
+  
+  sorry,
+end
+
+def pol: ℚ [X]:=
+X^2+ (1/2)* X +1/3
+
+open set
+
+example : lcm_denom_coeffs pol = 6 :=
+begin
+  unfold lcm_denom_coeffs,
+  have h1 : (pol).support= { 0,1,2},{
+    rw finset.ext_iff,
+    intro a,
+    split,{
+      --rw pol,
+      intro ha,
+      by_cases a<3,{
+        sorry,
+      },
+      rw not_lt at h,
+      exfalso,
+      rw pol at ha,
+      sorry,
+    },
+    --rw finsupp.mem_support_iff,
+    sorry,
+  },
+  rw h1,
+  rw pol,
+  sorry,
+end
+ -/
+
+
+/- 
+def clear_den (p : ℚ[X]) : ℤ [X]:=
+∑ i in p.support, (-1) * monomial i  -/
+
+
+-- def clear_den : ℚ [X]  →   ℤ [X]  := λ p, (lcm_denom_coeffs p) * p
+
+
+ 
 
 /-
  The Lemma gives a lower bound on the absolute value of a polynomial f with integral coefficients evaluated at a rational number x which is not a root of f 
