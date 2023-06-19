@@ -7,6 +7,7 @@ import data.real.irrational
 import analysis.calculus.cont_diff
 import data.polynomial.denoms_clearable
 import algebra.gcd_monoid.finset
+import data.rat.defs
 open_locale classical big_operators polynomial
 open polynomial
 
@@ -48,6 +49,7 @@ rat.denom_eq_one_iff
 per lcm: guardare polynomial.integral_normalization
 
  -/
+ 
 
 def denom_coeffs (p : ℚ[X]): ℕ → ℕ := λ n,  (p.coeff n).denom
 
@@ -59,7 +61,12 @@ def canc_denom2  (p : ℚ[X]) : ℚ[X] := (lcm_denom_coeffs p) • p
 def canc_denom (p : ℚ[X]) : ℚ[X] := 
 ∑ i in p.support,  monomial i  (↑(lcm_denom_coeffs p) * (p.coeff i))
 
-
+theorem canc_denom_int (p : ℚ[X]) : ∀ n: ℕ , ((canc_denom p).coeff n).denom=1:=
+begin
+  intro n,
+  rw rat.denom_eq_one_iff,
+  sorry,
+end
 
 
 -- def to_subring
@@ -70,25 +77,6 @@ def canc_denom (p : ℚ[X]) : ℚ[X] :=
 
 Scusate per il casino, ho fatto esperimenti che non vorrei cancellare
 
-
-example (p: ℚ [X]): ∀n,  ↑((canc_denom p ).coeff n).denom ∣ ((canc_denom p ).coeff n).num :=
-begin
-  intro n,
-  let a:= ((canc_denom p ).coeff n),
-  let l:= lcm_denom_coeffs p,
-  have ha: ((canc_denom p ).coeff n)=  (lcm_denom_coeffs p) * (p.coeff n),{
-    unfold canc_denom,
-    
-  },
-  have hdiv : ↑((canc_denom p ).coeff n).denom ∣ l,
-  {
-    unfold canc_denom,
-    sorry,
-  },
-  
-  
-  sorry,
-end
 
 def pol: ℚ [X]:=
 X^2+ (1/2)* X +1/3
@@ -121,13 +109,6 @@ begin
 end
  -/
 
-
-/- 
-def clear_den (p : ℚ[X]) : ℤ [X]:=
-∑ i in p.support, (-1) * monomial i  -/
-
-
--- def clear_den : ℚ [X]  →   ℤ [X]  := λ p, (lcm_denom_coeffs p) * p
 
 
  
