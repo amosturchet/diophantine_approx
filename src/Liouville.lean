@@ -49,18 +49,35 @@ rat.denom_eq_one_iff
 per lcm: guardare polynomial.integral_normalization
 
  -/
- 
- lemma aux (n :ℕ  )  (x :ℚ )  : (↑ n * x ).denom=1 ↔  ↑x.denom ∣ n :=
+
+#eval (rat.mk 4 2)
+
+ lemma aux (n :ℕ  ) (hn: n≠ 0)  (x :ℚ )  : (↑ n * x ).denom=1 ↔  ↑x.denom ∣ n :=
  begin
   rw [rat.mul_num_denom , rat.coe_nat_denom , rat.coe_nat_num],
   simp,
-  have  d: ℕ := n.gcd x.denom,
-  have hn: gcd n x.denom ∣ n, exact gcd_dvd_left _ _,
+  have  hd:  (gcd n x.denom : ℤ)  ≠ 0, {
+    rw <- int.cast_zero,
+    by_contra,
+    rw gcd_eq_zero_iff at h,
+    norm_cast at h,
+    exact hn h.1,
+    sorry,
+  },
+  have hnd: gcd n x.denom ∣ n, exact gcd_dvd_left _ _,
   have hden: gcd n x.denom ∣ x.denom, exact gcd_dvd_right _ _,
-  cases hn with wn hwn,
+  cases hnd with wn hwn,
   cases hden with wd hwd,
   nth_rewrite 0 [hwn],
   nth_rewrite 1 [hwd],
+  nth_rewrite 0 mul_comm,
+  nth_rewrite 1 mul_comm,
+  nth_rewrite 2 mul_comm,
+  push_cast,
+  rw <-mul_assoc,
+  rw rat.div_mk_div_cancel_left, 
+  swap, exact hd,
+
   simp,
   split, {
     --rw [rat.coe_int_eq_mk, rat.mul_def (one_ne_zero) hb],
@@ -72,6 +89,11 @@ per lcm: guardare polynomial.integral_normalization
 def denom_coeffs (p : ℚ[X]): ℕ → ℕ := λ n,  (p.coeff n).denom
 
 def lcm_denom_coeffs (p : ℚ[X]) : ℕ  := (p.support).lcm (denom_coeffs p)
+
+#check {0,1,2}
+
+#eval {0,1,2}.lcm ((monomial 2 3 + monomial 1 6 + monomial 0 1).coeff)
+
 
 theorem canc_denom_int (p : ℚ[X]) : ∀ n: ℕ , ↑(↑(lcm_denom_coeffs p) * (p.coeff n)).num=(↑(lcm_denom_coeffs p) * (p.coeff n)):=
 begin
@@ -102,12 +124,41 @@ begin
     rw [polynomial.eval₂_eq_sum , polynomial.sum_def],
     simp,
     rw canc_denom3,
+    sorry,
   },
 end
 
 -- def to_subring
+/- 
+def pol: ℚ [X]:= 
+X^2+ (1/2)* X +1/3
 
+example : lcm_denom_coeffs pol = 6 :=
+begin
+  unfold lcm_denom_coeffs,
+  have h1 : (pol).support= { 0,1,2},{
+    rw finset.ext_iff,
+    intro a,
+    split,{
+      --rw pol,
+      intro ha,
+      by_cases a<3,{
+        sorry,
+      },
+      rw not_lt at h,
+      exfalso,
+      rw pol at ha,
+      sorry,
+    },
+    --rw finsupp.mem_support_iff,
+    sorry,
+  },
+  rw h1,
+  rw pol,
+  sorry,
+end
 
+ -/
 /- 
 
 Scusate per il casino, ho fatto esperimenti che non vorrei cancellare
@@ -142,6 +193,28 @@ begin
   rw pol,
   sorry,
 end
+
+#eval gcd (6:ℤ)  (-9:ℤ )
+
+example : (gcd (6:ℤ ) (9:ℤ ) )  = ↑ 3 :=
+begin
+  have h1 : 3 ∣ 6, use 2, ring,
+  have h2 : 3 ∣ 9, use 3, ring,
+  have h3 : ∀ c:ℤ  , c∣ 6→ c∣ 9→c∣ 3,{
+    intros c hc1 hc2,
+    cases hc1 with a ha,
+    cases hc2 with b hb,
+    use b-a,
+    calc 3=9-6 : by ring
+      ... = c * b-6 : by rw hb
+      ... = c*b- c* a : by rw ha
+      ... = c*(b-a) : by linarith,
+  },
+  apply associa
+  --dvd_gcd_iff
+end
+
+
  -/
 
 
