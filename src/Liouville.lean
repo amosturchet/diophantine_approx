@@ -42,7 +42,7 @@ docs#rat.denom_eq_one_iff.
 
 serve:
 
-import data.rat.defs
+
 rat.denom_eq_one_iff
 
 
@@ -50,10 +50,36 @@ per lcm: guardare polynomial.integral_normalization
 
  -/
  
+ lemma aux (n :ℕ  )  (x :ℚ )  : (↑ n * x ).denom=1 ↔  ↑x.denom ∣ n :=
+ begin
+  rw [rat.mul_num_denom , rat.coe_nat_denom , rat.coe_nat_num],
+  simp,
+  have  d: ℕ := n.gcd x.denom,
+  have hn: gcd n x.denom ∣ n, exact gcd_dvd_left _ _,
+  have hden: gcd n x.denom ∣ x.denom, exact gcd_dvd_right _ _,
+  cases hn with wn hwn,
+  cases hden with wd hwd,
+  nth_rewrite 0 [hwn],
+  nth_rewrite 1 [hwd],
+  simp,
+  split, {
+    --rw [rat.coe_int_eq_mk, rat.mul_def (one_ne_zero) hb],
+    intro h,
+
+  }
+ end
 
 def denom_coeffs (p : ℚ[X]): ℕ → ℕ := λ n,  (p.coeff n).denom
 
 def lcm_denom_coeffs (p : ℚ[X]) : ℕ  := (p.support).lcm (denom_coeffs p)
+
+theorem canc_denom_int (p : ℚ[X]) : ∀ n: ℕ , ↑(↑(lcm_denom_coeffs p) * (p.coeff n)).num=(↑(lcm_denom_coeffs p) * (p.coeff n)):=
+begin
+  intro n,
+  rw <-rat.denom_eq_one_iff,
+ -- rw rat.mul_def,
+  sorry,
+end
 
 
 def canc_denom2  (p : ℚ[X]) : ℚ[X] := (lcm_denom_coeffs p) • p 
@@ -61,16 +87,25 @@ def canc_denom2  (p : ℚ[X]) : ℚ[X] := (lcm_denom_coeffs p) • p
 def canc_denom (p : ℚ[X]) : ℚ[X] := 
 ∑ i in p.support,  monomial i  (↑(lcm_denom_coeffs p) * (p.coeff i))
 
-theorem canc_denom_int (p : ℚ[X]) : ∀ n: ℕ , ((canc_denom p).coeff n).denom=1:=
+
+def canc_denom3 : ℚ[X]→ ℤ [X]:= λ p,  ∑ i in p.support,  monomial i  (↑(lcm_denom_coeffs p) * (p.coeff i)).num
+
+
+
+theorem same_roots : ∀ p:ℚ[X], ∀ x:ℝ, polynomial.eval₂ (algebra_map ℚ ℝ) (x) p =0 ↔  polynomial.eval₂ (algebra_map ℤ  ℝ) (x) (canc_denom3 p)=0:=
 begin
-  intro n,
-  rw rat.denom_eq_one_iff,
-  sorry,
+  intros p x,
+  --rw canc_denom3,
+  split,{
+    intro h,
+    --simp,
+    rw [polynomial.eval₂_eq_sum , polynomial.sum_def],
+    simp,
+    rw canc_denom3,
+  },
 end
 
-
 -- def to_subring
-
 
 
 /- 
