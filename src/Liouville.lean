@@ -7,7 +7,8 @@ import data.real.irrational
 import analysis.calculus.cont_diff
 import data.polynomial.denoms_clearable
 import algebra.gcd_monoid.finset
-import data.rat.defs
+import algebra.gcd_monoid.basic
+--import data.rat.defs
 open_locale classical big_operators polynomial
 open polynomial
 
@@ -50,19 +51,24 @@ per lcm: guardare polynomial.integral_normalization
 
  -/
 
-#eval (rat.mk 4 2)
+
+lemma aux2  (a b:ℤ ) : ∃ n1 n2 :ℤ , (a= gcd a b * n1) ∧ (b=gcd a b * n2) ∧ gcd n1 n1 =1:= 
+begin 
+  sorry,
+end
+
+
+#eval (rat.mk 8 6)
 
  lemma aux (n :ℕ  ) (hn: n≠ 0)  (x :ℚ )  : (↑ n * x ).denom=1 ↔  ↑x.denom ∣ n :=
  begin
   rw [rat.mul_num_denom , rat.coe_nat_denom , rat.coe_nat_num],
   simp,
   have  hd:  (gcd n x.denom : ℤ)  ≠ 0, {
-    rw <- int.cast_zero,
     by_contra,
     rw gcd_eq_zero_iff at h,
     norm_cast at h,
     exact hn h.1,
-    sorry,
   },
   have hnd: gcd n x.denom ∣ n, exact gcd_dvd_left _ _,
   have hden: gcd n x.denom ∣ x.denom, exact gcd_dvd_right _ _,
@@ -77,12 +83,71 @@ per lcm: guardare polynomial.integral_normalization
   rw <-mul_assoc,
   rw rat.div_mk_div_cancel_left, 
   swap, exact hd,
+  have hwdpos: 0<wd,{
+    by_contra,
+    have: wd=0,linarith,
+    rw this at hwd,
+    simp at hwd,
+    exact pos_iff_ne_zero.1 x.pos hwd,
+  },
+  have hcop1: (x.num).nat_abs.coprime ↑wd, {
+    change x.num.nat_abs.gcd ↑wd=1,
+    rw eq_comm,
+    norm_cast,
+    apply nat.gcd_greatest,
+    exact one_dvd _, exact one_dvd _,
+    intros e he1 he2,
+    have h2:  e∣ x.denom,{
+      cases he2 with f hf, 
+      rw hf at hwd,
+      rw mul_comm e f at hwd,
+      rw <-mul_assoc at hwd,
+      use gcd n x.denom * f,
+      linarith,
+    },
+    have h3: x.num.nat_abs.gcd x.denom=1, exact x.cop,
+    rw <-h3,
+    rw nat.dvd_gcd_iff,
+    split, exact he1, exact h2,
+  },
+  have hcop2: (wn).coprime ↑wd, {
 
-  simp,
+    sorry,
+  },
+  have hcop : (x.num * ↑wn).nat_abs.coprime ↑wd,{
+    have hcop': (x.num.nat_abs * wn).coprime ↑wd, exact nat.coprime.mul hcop1 hcop2,
+    have haux : (x.num * ↑wn).nat_abs=(x.num.nat_abs * wn), {
+      nth_rewrite 1 <-int.nat_abs_of_nat wn,    
+      zify,
+      exact abs_mul _ _, 
+    },
+    rwa haux,
+  },
+  have h1: (rat.mk (x.num * ↑wn) ↑wd).denom = wd, {
+    rw  <-rat.num_denom',
+    exact hwdpos,
+    exact hcop,
+  --rw  <-rat.num_denom' (x.num * ↑wn) wd hwdpos hcop,
+  },
+  rw h1,
   split, {
-    --rw [rat.coe_int_eq_mk, rat.mul_def (one_ne_zero) hb],
     intro h,
-
+    rw h at hwd,
+    rw hwd,
+    simp,
+    exact gcd_dvd_left _ _,
+  },
+  { 
+    intro h,
+    replace hwd : x.denom = n.gcd x.denom * wd,{
+      nth_rewrite 0 hwd,
+      simp,      
+      left,
+      refl,
+    },
+    rw (nat.gcd_eq_right_iff_dvd).1 h at hwd,
+    rw eq_comm at hwd,
+    exact (nat.mul_right_eq_self_iff x.pos).1 hwd,
   }
  end
 
@@ -90,9 +155,9 @@ def denom_coeffs (p : ℚ[X]): ℕ → ℕ := λ n,  (p.coeff n).denom
 
 def lcm_denom_coeffs (p : ℚ[X]) : ℕ  := (p.support).lcm (denom_coeffs p)
 
-#check {0,1,2}
-
-#eval {0,1,2}.lcm ((monomial 2 3 + monomial 1 6 + monomial 0 1).coeff)
+def S: finset ℕ  :={0,1,2}
+def f: ℕ →ℕ:= λ x, 4*x+4
+#eval S.lcm f
 
 
 theorem canc_denom_int (p : ℚ[X]) : ∀ n: ℕ , ↑(↑(lcm_denom_coeffs p) * (p.coeff n)).num=(↑(lcm_denom_coeffs p) * (p.coeff n)):=
