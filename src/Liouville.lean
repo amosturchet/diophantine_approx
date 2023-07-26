@@ -71,24 +71,6 @@ def canc_denom (p : ℚ[X]) : ℚ[X] :=
 Scusate per il casino, ho fatto esperimenti che non vorrei cancellare
 
 
-example (p: ℚ [X]): ∀n,  ↑((canc_denom p ).coeff n).denom ∣ ((canc_denom p ).coeff n).num :=
-begin
-  intro n,
-  let a:= ((canc_denom p ).coeff n),
-  let l:= lcm_denom_coeffs p,
-  have ha: ((canc_denom p ).coeff n)=  (lcm_denom_coeffs p) * (p.coeff n),{
-    unfold canc_denom,
-    
-  },
-  have hdiv : ↑((canc_denom p ).coeff n).denom ∣ l,
-  {
-    unfold canc_denom,
-    sorry,
-  },
-  
-  
-  sorry,
-end
 
 def pol: ℚ [X]:=
 X^2+ (1/2)* X +1/3
