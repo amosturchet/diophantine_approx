@@ -51,105 +51,84 @@ per lcm: guardare polynomial.integral_normalization
 
  -/
 
-
-lemma aux2  (a b:ℤ ) : ∃ n1 n2 :ℤ , (a= gcd a b * n1) ∧ (b=gcd a b * n2) ∧ gcd n1 n1 =1:= 
-begin 
-  sorry,
-end
+-- questo è circa int.exists_gcd_one'
 
 
-#eval (rat.mk 8 6)
 
- lemma aux (n :ℕ  ) (hn: n≠ 0)  (x :ℚ )  : (↑ n * x ).denom=1 ↔  ↑x.denom ∣ n :=
- begin
-  rw [rat.mul_num_denom , rat.coe_nat_denom , rat.coe_nat_num],
-  simp,
-  have  hd:  (gcd n x.denom : ℤ)  ≠ 0, {
-    by_contra,
-    rw gcd_eq_zero_iff at h,
-    norm_cast at h,
-    exact hn h.1,
+
+
+lemma mul_denom_eq_one_iff_denom_dvd_fact (n :ℕ  ) (hn: n≠ 0)  (x :ℚ )  : (↑ n * x ).denom=1 ↔  ↑x.denom ∣ n :=
+begin
+  rw [rat.mul_num_denom , rat.coe_nat_denom , rat.coe_nat_num, one_mul],
+  have hd: 0< (n:ℤ).gcd (x.denom :ℤ )   , {    
+    exact  (nat.gcd_pos_of_pos_right) n x.pos,
   },
-  have hnd: gcd n x.denom ∣ n, exact gcd_dvd_left _ _,
-  have hden: gcd n x.denom ∣ x.denom, exact gcd_dvd_right _ _,
-  cases hnd with wn hwn,
-  cases hden with wd hwd,
-  nth_rewrite 0 [hwn],
-  nth_rewrite 1 [hwd],
-  nth_rewrite 0 mul_comm,
-  nth_rewrite 1 mul_comm,
-  nth_rewrite 2 mul_comm,
-  push_cast,
+  rcases int.exists_gcd_one hd with ⟨ wn, wd, hcopw, hwn, hwd⟩ , 
+  rw mul_comm,
+  nth_rewrite 0 hwn,
+  nth_rewrite 1 hwd,
   rw <-mul_assoc,
-  rw rat.div_mk_div_cancel_left, 
-  swap, exact hd,
+  rw rat.div_mk_div_cancel_left , 
+  swap,  {
+  apply norm_num.ne_zero_of_pos, 
+  norm_cast,
+  exact hd,
+  },
   have hwdpos: 0<wd,{
-    by_contra,
-    have: wd=0,linarith,
-    rw this at hwd,
-    simp at hwd,
-    exact pos_iff_ne_zero.1 x.pos hwd,
+    apply  pos_of_mul_pos_left (eq.trans_gt hwd ( nat.cast_pos.2 x.pos))  (le_of_lt (nat.cast_pos.2 hd)),
   },
-  have hcop1: (x.num).nat_abs.coprime ↑wd, {
-    change x.num.nat_abs.gcd ↑wd=1,
-    rw eq_comm,
+  have h1: (rat.mk (x.num * wn) wd.nat_abs).denom = wd.nat_abs,{
+    rw  <-rat.num_denom',{
+      apply int.nat_abs_pos_of_ne_zero,
+      apply norm_num.ne_zero_of_pos,
+      exact  hwdpos,
+    },
+    rw int.nat_abs_mul,
+    apply nat.coprime.mul;
+    apply nat.coprime_iff_gcd_eq_one.2;
+    rw <-int.gcd_eq_nat_abs,
+    { 
+      apply nat.eq_one_of_dvd_one,
+      have hcopx : 1= x.num.gcd ↑(x.denom),{
+        rw eq_comm,
+        exact x.cop,
+      },
+      rw hcopx,
+      apply gcd_dvd_gcd,
+      refl,
+      rw int.nat_abs_dvd_iff_dvd,
+      exact dvd.intro _ (eq.symm hwd),
+    },
+    exact hcopw,
+  },
+  have h2 : ↑(wd.nat_abs)=wd,{
     norm_cast,
-    apply nat.gcd_greatest,
-    exact one_dvd _, exact one_dvd _,
-    intros e he1 he2,
-    have h2:  e∣ x.denom,{
-      cases he2 with f hf, 
-      rw hf at hwd,
-      rw mul_comm e f at hwd,
-      rw <-mul_assoc at hwd,
-      use gcd n x.denom * f,
-      linarith,
-    },
-    have h3: x.num.nat_abs.gcd x.denom=1, exact x.cop,
-    rw <-h3,
-    rw nat.dvd_gcd_iff,
-    split, exact he1, exact h2,
+    exact abs_eq_self.2 (le_of_lt hwdpos),    
   },
-  have hcop2: (wn).coprime ↑wd, {
-
-    sorry,
-  },
-  have hcop : (x.num * ↑wn).nat_abs.coprime ↑wd,{
-    have hcop': (x.num.nat_abs * wn).coprime ↑wd, exact nat.coprime.mul hcop1 hcop2,
-    have haux : (x.num * ↑wn).nat_abs=(x.num.nat_abs * wn), {
-      nth_rewrite 1 <-int.nat_abs_of_nat wn,    
-      zify,
-      exact abs_mul _ _, 
-    },
-    rwa haux,
-  },
-  have h1: (rat.mk (x.num * ↑wn) ↑wd).denom = wd, {
-    rw  <-rat.num_denom',
-    exact hwdpos,
-    exact hcop,
-  --rw  <-rat.num_denom' (x.num * ↑wn) wd hwdpos hcop,
-  },
+  rw h2 at h1,
   rw h1,
-  split, {
+  simp,
+  split,{
     intro h,
-    rw h at hwd,
+    rw h at h2,
+    rw <-h2 at hwd,
+    simp at hwd,
     rw hwd,
-    simp,
     exact gcd_dvd_left _ _,
   },
-  { 
-    intro h,
-    replace hwd : x.denom = n.gcd x.denom * wd,{
-      nth_rewrite 0 hwd,
-      simp,      
-      left,
-      refl,
-    },
-    rw (nat.gcd_eq_right_iff_dvd).1 h at hwd,
-    rw eq_comm at hwd,
-    exact (nat.mul_right_eq_self_iff x.pos).1 hwd,
-  }
- end
+  intro h,
+  rw int.gcd_eq_right (has_dvd.dvd.nat_cast h) at hwd,
+  simp at hwd,
+  apply norm_num.nat_abs_pos,
+  norm_cast,
+  nth_rewrite 0 <-int.one_mul ↑(x.denom) at hwd,
+  have : (x.denom : ℤ ) ≠  0,{
+    exact norm_num.ne_zero_of_pos x.denom (nat.cast_pos.2 x.pos),
+  },  
+  apply is_domain.mul_right_cancel_of_ne_zero  (this),
+  exact hwd,
+end
+
 
 def denom_coeffs (p : ℚ[X]): ℕ → ℕ := λ n,  (p.coeff n).denom
 
@@ -164,9 +143,50 @@ theorem canc_denom_int (p : ℚ[X]) : ∀ n: ℕ , ↑(↑(lcm_denom_coeffs p) *
 begin
   intro n,
   rw <-rat.denom_eq_one_iff,
- -- rw rat.mul_def,
-  sorry,
+  by_cases n∈ p.support, {
+    rw mul_denom_eq_one_iff_denom_dvd_fact,
+    exact finset.dvd_lcm h,
+    unfold lcm_denom_coeffs,
+    intro h0,
+    rw finset.lcm_eq_zero_iff at h0,
+    have h1: ∃ m,  (p.coeff m).denom  = 0,{
+      rw set.mem_def at h0,
+      cases h0 with l hl,
+      use l,
+      exact hl.2,
+    },
+    cases h1 with m hm,
+    apply norm_num.ne_zero_of_pos ((p.coeff m).denom :ℤ ),
+    exact nat.cast_pos.2 (p.coeff m).pos,
+    norm_cast,
+    exact hm,
+  },
+  rw polynomial.not_mem_support_iff at h,
+  rw h,
+  simp,
 end
+
+/- theorem canc_denom_int (p : ℚ[X]) : ∀ n: ℕ , ↑(↑(lcm_denom_coeffs p) * (p.coeff n)).num=(↑(lcm_denom_coeffs p) * (p.coeff n)):=
+begin
+  intro n,
+  rw <-rat.denom_eq_one_iff,
+  by_cases p.coeff n=0,{
+    rw h,
+    simp,
+  },
+  rw mul_denom_eq_one_iff_denom_dvd_fact,
+  rw <-ne.def  at h,
+  --unfold lcm_denom_coeffs,
+  {
+    apply finset.dvd_lcm,
+    rw polynomial.mem_support_iff ,
+    exact h,
+  },
+  unfold lcm_denom_coeffs,
+  intro h1,
+  rw <-finset.lcm_eq_zero_iff at h,
+    sorry,
+end -/
 
 
 def canc_denom2  (p : ℚ[X]) : ℚ[X] := (lcm_denom_coeffs p) • p 
@@ -177,21 +197,79 @@ def canc_denom (p : ℚ[X]) : ℚ[X] :=
 
 def canc_denom3 : ℚ[X]→ ℤ [X]:= λ p,  ∑ i in p.support,  monomial i  (↑(lcm_denom_coeffs p) * (p.coeff i)).num
 
+def canc_denom4 (p:ℚ [X]): ℤ [X]:=  ∑ i in p.support,  monomial i  (↑(lcm_denom_coeffs p) * (p.coeff i)).num
 
+def poly_int_to_rat (q: ℤ[X]):ℚ [X]:= ∑ i in q.support,  monomial i ↑(q.coeff i) 
 
-theorem same_roots : ∀ p:ℚ[X], ∀ x:ℝ, polynomial.eval₂ (algebra_map ℚ ℝ) (x) p =0 ↔  polynomial.eval₂ (algebra_map ℤ  ℝ) (x) (canc_denom3 p)=0:=
+--sono bloccato col teorema sotto
+
+theorem same_roots : ∀ p:ℚ[X], ∀ x:ℝ, polynomial.eval₂ (algebra_map ℚ ℝ) (x) p =0 ↔  polynomial.eval₂ (algebra_map ℚ  ℝ) (x) (poly_int_to_rat(canc_denom4 p))=0:=
 begin
+  
   intros p x,
-  --rw canc_denom3,
+  rw canc_denom4,
+  
+  rw poly_int_to_rat,
+  
+  
+  nth_rewrite 1 polynomial.eval₂_eq_sum,
+  rw polynomial.sum_def,
+  sorry,
+  
+  rw polynomial.eval₂_eq_sum,
+  simp,
+  
+  rw polynomial.sum_def,
+
+  rw poly_int_to_rat,
+  rw canc_denom4,
+ -- rw polynomial.eval₂_add ,
+  rw canc_denom_int,
+
+
+  rw polynomial.eval₂_eq_sum,
+  rw polynomial.eval₂_eq_sum,
+  simp,
+  
+  rw canc_denom_int p _,
   split,{
     intro h,
     --simp,
     rw [polynomial.eval₂_eq_sum , polynomial.sum_def],
     simp,
-    rw canc_denom3,
+    --rw canc_denom3,
     sorry,
   },
 end
+
+
+/- theorem same_roots : ∀ p:ℚ[X], ∀ x:ℝ, polynomial.eval₂ (algebra_map ℚ ℝ) (x) p =0 ↔  polynomial.eval₂ (algebra_map ℚ  ℝ) (x) (poly_int_to_rat(canc_denom4 p))=0:=
+begin
+  intros p x,
+  rw polynomial.eval₂_eq_sum,
+  rw polynomial.eval₂_eq_sum,
+  simp,
+
+  rw poly_int_to_rat,
+  rw canc_denom4,
+ -- rw polynomial.eval₂_add ,
+  rw canc_denom_int,
+
+
+  rw polynomial.eval₂_eq_sum,
+  rw polynomial.eval₂_eq_sum,
+  simp,
+  
+  rw canc_denom_int p _,
+  split,{
+    intro h,
+    --simp,
+    rw [polynomial.eval₂_eq_sum , polynomial.sum_def],
+    simp,
+    --rw canc_denom3,
+    sorry,
+  },
+end -/
 
 -- def to_subring
 /- 
@@ -351,4 +429,6 @@ have hmeanval : ∃ α : ℝ,  (α < x ) ∧ ( α > (↑a / ↑b ) ) ∧ abs((po
 
 sorry,
 end
+
+
 
